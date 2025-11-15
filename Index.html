@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mural Interativo de Personalidades Negras</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --cor-fundo: #f4f4f9;
+            --cor-texto: #333;
+            --cor-primaria: #2c3e50; /* Azul escuro/grafite */
+            --cor-secundaria: #e67e22; /* Laranja queimado */
+            --cor-branco: #ffffff;
+            --sombra: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--cor-primaria), #34495e);
+            color: var(--cor-branco);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: var(--sombra);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            margin: 0.5rem 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .mural-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 2rem;
+        }
+
+        .personality-card {
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--cor-branco);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .personality-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--sombra);
+        }
+
+        .personality-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--cor-secundaria);
+            margin-bottom: 1rem;
+        }
+
+        .personality-card .name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--cor-primaria);
+        }
+
+        /* Modal (Janela Interativa) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            animation: fadeIn 0.4s;
+        }
+
+        .modal-content {
+            background-color: var(--cor-branco);
+            margin: 5% auto;
+            padding: 2rem 2.5rem;
+            border-radius: 15px;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-button:hover {
+            color: var(--cor-errado);
+        }
+
+        #modal-title {
+            color: var(--cor-primaria);
+            margin-top: 0;
+            font-size: 2rem;
+            border-bottom: 3px solid var(--cor-secundaria);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        #modal-lifespan {
+            font-style: italic;
+            color: #777;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        #modal-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>Mural de Personalidades Negras</h1>
+            <p>Clique em uma personalidade para descobrir sua história.</p>
+        </header>
+
+        <main class="mural-grid" id="mural-grid">
+            <!-- Os cards das personalidades serão inseridos aqui pelo JavaScript -->
+        </main>
+    </div>
+
+    <!-- A estrutura do Modal -->
+    <div id="personality-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modal-title">Nome da Personalidade</h2>
+            <span id="modal-lifespan">(xxxx-xxxx)</span>
+            <p id="modal-text">Biografia completa aqui...</p>
+        </div>
+    </div>
+
+    <script>
+        const personalities = [
+            {
+                name: "Zumbi dos Palmares",
+                lifespan: "1655-1695",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Zumbi_dos_Palmares.jpg/440px-Zumbi_dos_Palmares.jpg",
+                bio: "Foi o último dos líderes do Quilombo dos Palmares, o maior dos quilombos do período colonial. Zumbi é um dos maiores símbolos da resistência negra à escravidão, lutando pela liberdade de seu povo. Sua morte, em 20 de novembro, deu origem ao Dia da Consciência Negra."
+            },
+            {
+                name: "Carolina Maria de Jesus",
+                lifespan: "1914-1977",
+                image: "https://upload.wikimedia.org/wikipedia/pt/thumb/c/c3/Carolina_Maria_de_Jesus_em_1961.jpg/440px-Carolina_Maria_de_Jesus_em_1961.jpg",
+                bio: "Escritora, compositora e poetisa, ficou mundialmente conhecida por seu livro 'Quarto de Despejo: Diário de uma Favelada'. Em seus diários, escritos em cadernos que encontrava no lixo, ela retratou o cotidiano duro e a realidade da favela, dando voz a milhões de pessoas marginalizadas."
+            },
+            {
+                name: "Pelé",
+                lifespan: "1940-2022",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pele_con_la_copa_del_Mundo_en_1970.jpg/458px-Pele_con_la_copa_del_Mundo_en_1970.jpg",
+                bio: "Edson Arantes do Nascimento, o Pelé, é considerado o maior jogador de futebol de todos os tempos. Conhecido como 'Rei do Futebol', ele foi um ícone global que transcendeu o esporte, tornando-se um dos brasileiros mais famosos da história e um símbolo de excelência negra."
+            },
+            {
+                name: "Elza Soares",
+                lifespan: "1930-2022",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Elza_Soares_Virada_Cultural_2016_%28cropped%29.jpg/440px-Elza_Soares_Virada_Cultural_2016_%28cropped%29.jpg",
+                bio: "Uma das maiores cantoras da história da música brasileira, foi eleita a 'Voz do Milênio' pela BBC. Com uma voz rouca e inconfundível, sua carreira foi marcada pela superação, inovação e pela defesa das mulheres e da população negra."
+            },
+            {
+                name: "Luiz Gama",
+                lifespan: "1830-1882",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Luiz_Gama_-_foto_de_1870.jpg/440px-Luiz_Gama_-_foto_de_1870.jpg",
+                bio: "Advogado autodidata, jornalista e escritor, foi um dos maiores abolicionistas do Brasil. Nascido livre, foi vendido como escravo aos 10 anos. Conquistou judicialmente a própria liberdade e passou a atuar na defesa de pessoas escravizadas, libertando mais de 500 cativos. É considerado o 'Patrono da Abolição da Escravidão do Brasil'."
+            },
+            {
+                name: "Djamila Ribeiro",
+                lifespan: "1980-",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Djamila_Ribeiro_no_Sempre_Um_Papo.jpg/440px-Djamila_Ribeiro_no_Sempre_Um_Papo.jpg",
+                bio: "Filósofa, feminista e escritora, é uma das vozes mais influentes do ativismo negro e feminista no Brasil. Autora de best-sellers como 'Pequeno Manual Antirracista' e 'O que é Lugar de Fala?', ela popularizou discussões complexas sobre racismo e gênero, tornando-as acessíveis ao grande público."
+            },
+            {
+                name: "Emicida",
+                lifespan: "1985-",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Emicida_-_2019_%2848209012247%29_%28cropped%29.jpg/440px-Emicida_-_2019_%2848209012247%29_%28cropped%29.jpg",
+                bio: "Leandro Roque de Oliveira, o Emicida, é um rapper, cantor, compositor e empresário. Considerado um dos artistas mais importantes de sua geração, suas letras abordam a realidade social, o racismo e a história do Brasil. Seu projeto 'AmarElo' é um marco na música brasileira contemporânea."
+            },
+            {
+                name: "Conceição Evaristo",
+                lifespan: "1946-",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Concei%C3%A7%C3%A3o_Evaristo_na_FLIQ_2018.jpg/440px-Concei%C3%A7%C3%A3o_Evaristo_na_FLIQ_2018.jpg",
+                bio: "Escritora e linguista, sua obra literária é fundamental para a literatura afro-brasileira. Ela cunhou o termo 'escrevivência' para descrever sua escrita, que nasce da vivência de mulheres negras. Autora de clássicos como 'Ponciá Vicêncio' e 'Olhos d'água'."
+            },
+            {
+                name: "Glória Maria",
+                lifespan: "1949-2023",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Gloria_Maria_em_2017.jpg/440px-Gloria_Maria_em_2017.jpg",
+                bio: "Jornalista, repórter e apresentadora de televisão, foi uma pioneira no telejornalismo brasileiro. Foi a primeira repórter a entrar ao vivo e em cores na TV brasileira. Conhecida por suas reportagens em mais de 100 países, abriu portas e se tornou uma referência para gerações de jornalistas negros."
+            },
+            {
+                name: "Lázaro Ramos",
+                lifespan: "1978-",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/L%C3%A1zaro_Ramos_-_2018.jpg/440px-L%C3%A1zaro_Ramos_-_2018.jpg",
+                bio: "Ator, apresentador, cineasta e escritor, é um dos artistas mais versáteis e premiados de sua geração. Com papéis icônicos no cinema, teatro e televisão, ele também é um importante ativista pelas causas raciais e autor de livros como 'Na Minha Pele'."
+            }
+        ];
+
+        const muralGrid = document.getElementById('mural-grid');
+        const modal = document.getElementById('personality-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalLifespan = document.getElementById('modal-lifespan');
+        const modalText = document.getElementById('modal-text');
+        const closeButton = document.querySelector('.close-button');
+
+        // Preenche o mural com os cards
+        personalities.forEach(person => {
+            const card = document.createElement('div');
+            card.className = 'personality-card';
+            card.innerHTML = `
+                <img src="${person.image}" alt="Foto de ${person.name}">
+                <div class="name">${person.name}</div>
+            `;
+            card.addEventListener('click', () => {
+                modalTitle.textContent = person.name;
+                modalLifespan.textContent = person.lifespan;
+                modalText.textContent = person.bio;
+                modal.style.display = 'block';
+            });
+            muralGrid.appendChild(card);
+        });
+
+        // Funcionalidade para fechar o modal
+        closeButton.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+    </script>
+
+</body>
+</html>
